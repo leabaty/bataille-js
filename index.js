@@ -70,6 +70,20 @@ distributePlayingDeck(playingDeck);
 let player1Score = player1Deck.length;
 let player2Score = player2Deck.length;
 
+// ---------- Testing a winner out ------------
+// In case a player has no cards anymore, the game is ended, the winner is announced
+const detectAWinner = (player1Cards, player2Cards) => {
+  if (player1Cards.length === 0) {
+    console.log(
+      chalk.bgGreen("Le jeu est terminé, le joueur 2 gagne la partie !")
+    );
+  } else if (player2Cards.length === 0) {
+    console.log(
+      chalk.bgBlue("Le jeu est terminé, le joueur 1 gagne la partie !")
+    );
+  }
+};
+
 //  ---------- Comparing the cards --------------
 
 // update the value of playing cards with the last card in the playing deck
@@ -81,6 +95,10 @@ let player1WarDeck = [];
 let player2WarDeck = [];
 
 const comparePlayingCards = () => {
+  // updated the scores and check the values
+  player1Score = player1Deck.length;
+  player2Score = player2Deck.length;
+
   if (player1Score === 0 || player2Score === 0) return;
 
   // for each round, update the value of the 'top' card
@@ -135,18 +153,28 @@ const comparePlayingCards = () => {
     playWar(player1Deck, player2Deck);
   }
 
-  // --------- In case a player has no cards anymore --------
-  // the game is ended, the winner is announced
-  if (player1Deck.length === 0) {
-    console.log(
-      chalk.bgGreen("Le jeu est terminé, le joueur 2 gagne la partie !")
-    );
-  } else if (player2Deck.length === 0) {
-    console.log(chalk.bgBlue("Le jeu est terminé, le joueur 1 a gagné !"));
-  }
+  detectAWinner(player1Deck, player2Deck);
 };
 
 //  ---------- The war loop --------------
+const detectAWarWinner = (
+  player1Points,
+  player2Points,
+  player1Game,
+  player2Game,
+  player1WarGame,
+  player2WarGame
+) => {
+  if (player1Points === 0) {
+    player2Game.push(...player1WarGame, ...player2WarGame);
+    return;
+  }
+
+  if (player2Points === 0) {
+    player1Game.push(...player1WarGame, ...player2WarGame);
+    return;
+  }
+};
 
 const playWar = (player1Hand, player2Hand) => {
   if (player1Score === 0 || player2Score === 0) return;
@@ -157,73 +185,78 @@ const playWar = (player1Hand, player2Hand) => {
     player2WarDeck.push(player2Hand.shift());
   }
 
-  // update the value of playing cards with the last card in the playing deck
-  cardPlayer1 = player1Hand[0];
-  cardPlayer2 = player2Hand[0];
-
-  console.log(
-    chalk.bold("Le joueur 1 joue : " + cardPlayer1.name + cardPlayer1.color)
-  );
-  console.log(
-    chalk.bold("Le joueur 2 joue : " + cardPlayer2.name + cardPlayer2.color)
-  );
-
-  // --------- In case of a winner --------
-  // the winning player gets the cards in the wardeck + the playing card of his adversary
-  // the played card gets to the back of his pile
-  // the scores are updated
-  // the wardeck is emptied
-
-  if (cardPlayer1.number > cardPlayer2.number) {
-    player1Hand.push(...player1WarDeck, ...player2WarDeck);
-    player1Hand.push(player2Hand.shift());
-    player1Hand.push(player1Hand.shift());
-
-    player1Score = player1Hand.length;
-    player2Score = player2Hand.length;
-
-    console.log(chalk.bgBlue("Le joueur 1 remporte la bataille !"));
-    console.log(
-      "Son score est de " +
-        player1Score +
-        " et le score du Joueur 2 est de " +
-        player2Score
-    );
-
-    player1WarDeck = [];
-    player2WarDeck = [];
-  } else if (cardPlayer2.number > cardPlayer1.number) {
-    player2Hand.push(...player1WarDeck, ...player2WarDeck);
-    player2Hand.push(player1Hand.shift());
-    player2Hand.push(player2Hand.shift());
-
-    player1Score = player1Hand.length;
-    player2Score = player2Hand.length;
-
-    console.log(chalk.bgGreen("Le joueur 2 remporte la bataille !"));
-    console.log(
-      "Son score est de " +
-        player2Score +
-        " et le score du Joueur 1 est de " +
-        player1Score
-    );
-
-    player1WarDeck = [];
-    player2WarDeck = [];
-
-    // --------- In case of ex-aequo --------
-    // the war loop is relaunched
-  } else {
-    console.log(chalk.bgRed("Encore Ex-Aequo ! Bataille ! "));
-    playWar(player1Hand, player2Hand);
-  }
-
-  // --------- In case a player has no cards anymore --------
-  // the game is ended, the winner is announced
+  // after this blind draw, check if there is a winner
   if (player1Hand.length === 0) {
-    console.log(chalk.bgGreen("Le jeu est terminé, le joueur 2 a gagné !"));
+    player2Hand.push(...player1WarDeck, ...player2WarDeck);
+    return console.log("Le jeu se termine en pleine bataille... Le joueur 1 n'a plus de cartes !")
+
   } else if (player2Hand.length === 0) {
-    console.log(chalk.bgBlue("Le jeu est terminé, le joueur 1 a gagné !"));
+    player1Hand.push(...player1WarDeck, ...player2WarDeck);
+    return console.log("Le jeu se termine en pleine bataille... Le joueur 2 n'a plus de cartes !")
+
+    // otherwise, update the value of playing cards with the last card in the playing deck and continue the game
+  } else {
+    cardPlayer1 = player1Hand[0];
+    cardPlayer2 = player2Hand[0];
+
+    console.log(
+      chalk.bold("Le joueur 1 joue : " + cardPlayer1.name + cardPlayer1.color)
+    );
+    console.log(
+      chalk.bold("Le joueur 2 joue : " + cardPlayer2.name + cardPlayer2.color)
+    );
+
+    // --------- In case of a winner --------
+    // the winning player gets the cards in the wardeck + the playing card of his adversary
+    // the played card gets to the back of his pile
+    // the scores are updated
+    // the wardeck is emptied
+
+    if (cardPlayer1.number > cardPlayer2.number) {
+      player1Hand.push(...player1WarDeck, ...player2WarDeck);
+      player1Hand.push(player2Hand.shift());
+      player1Hand.push(player1Hand.shift());
+
+      player1Score = player1Hand.length;
+      player2Score = player2Hand.length;
+
+      console.log(chalk.bgBlue("Le joueur 1 remporte la bataille !"));
+      console.log(
+        "Son score est de " +
+          player1Score +
+          " et le score du Joueur 2 est de " +
+          player2Score
+      );
+
+      player1WarDeck = [];
+      player2WarDeck = [];
+    } else if (cardPlayer2.number > cardPlayer1.number) {
+      player2Hand.push(...player1WarDeck, ...player2WarDeck);
+      player2Hand.push(player1Hand.shift());
+      player2Hand.push(player2Hand.shift());
+
+      player1Score = player1Hand.length;
+      player2Score = player2Hand.length;
+
+      console.log(chalk.bgGreen("Le joueur 2 remporte la bataille !"));
+      console.log(
+        "Son score est de " +
+          player2Score +
+          " et le score du Joueur 1 est de " +
+          player1Score
+      );
+
+      player1WarDeck = [];
+      player2WarDeck = [];
+
+      // --------- In case of ex-aequo --------
+      // the war loop is relaunched
+    } else {
+      console.log(chalk.bgRed("Encore Ex-Aequo ! Bataille ! "));
+      playWar(player1Hand, player2Hand);
+    }
+
+    detectAWinner(player1Hand, player2Hand);
   }
 };
 
