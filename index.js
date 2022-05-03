@@ -157,25 +157,6 @@ const comparePlayingCards = () => {
 };
 
 //  ---------- The war loop --------------
-const detectAWarWinner = (
-  player1Points,
-  player2Points,
-  player1Game,
-  player2Game,
-  player1WarGame,
-  player2WarGame
-) => {
-  if (player1Points === 0) {
-    player2Game.push(...player1WarGame, ...player2WarGame);
-    return;
-  }
-
-  if (player2Points === 0) {
-    player1Game.push(...player1WarGame, ...player2WarGame);
-    return;
-  }
-};
-
 const playWar = (player1Hand, player2Hand) => {
   if (player1Score === 0 || player2Score === 0) return;
 
