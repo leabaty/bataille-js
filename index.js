@@ -23,8 +23,8 @@ const names = [
 
 const deck = [];
 
-let player1Deck = null;
-let player2Deck = null;
+let player1Deck = [];
+let player2Deck = [];
 
 const createDeck = (cardcolor, cardnumber) => {
   for (const color of cardcolor) {
@@ -100,10 +100,7 @@ const updateScores = (player1Cards, player2Cards) => {
 
 const announceScores = (winnerScore, loserScore) => {
   console.log(
-    "Son score est de " +
-      winnerScore +
-      " et le score du Joueur 2 est de " +
-      loserScore
+    "Son score est maintenant de " + winnerScore + " contre " + loserScore
   );
 };
 
@@ -130,8 +127,9 @@ const playGame = () => {
     updateScores(player1Deck, player2Deck);
     announceScores(player1Score, player2Score);
   }
+
   if (topCardPlayer2.number > topCardPlayer1.number) {
-    cardMoves(player1Deck, player2Deck, warDeck);
+    cardMoves(player2Deck, player1Deck, warDeck);
     console.log(chalk.bgGreen("Le joueur 2 remporte cette manche ! "));
     updateScores(player1Deck, player2Deck);
     announceScores(player2Score, player1Score);
