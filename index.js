@@ -1,6 +1,6 @@
 import chalk from "chalk";
 
-console.log(chalk.blue("Hello world!"));
+console.log(chalk.yellow("Jeu de la bataille"));
 
 // Initialization of values
 const colors = ["♣️", "❤️", "♦️", "♠️"];
@@ -75,27 +75,36 @@ let gameIsOver = false;
 
 // -------------
 
-const updateScores = (player1Cards, player2Cards) => {
-  player1Score = player1Cards.length;
-  player2Score = player2Cards.length;
-};
-
-const cardMoves = (winner, loser, warCards) => {
-  winner.push(loser.shift());
-  winner.push(winner.shift());
-
-  if (warCards.length > 0) {
-    winner.push(...warCards);
-    warCards.length = 0;
-  }
-};
-
 const checkGameOver = () => {
   if (player1Deck.length === 0 || player2Deck.length === 0) {
     gameIsOver = true;
   } else {
     gameIsOver = false;
   }
+};
+
+const cardMoves = (winnerDeck, loserDeck, warCards) => {
+  winnerDeck.push(loserDeck.shift());
+  winnerDeck.push(winnerDeck.shift());
+
+  if (warCards.length > 0) {
+    winnerDeck.push(...warCards);
+    warCards.length = 0;
+  }
+};
+
+const updateScores = (player1Cards, player2Cards) => {
+  player1Score = player1Cards.length;
+  player2Score = player2Cards.length;
+};
+
+const announceScores = (winnerScore, loserScore) => {
+  console.log(
+    "Son score est de " +
+      winnerScore +
+      " et le score du Joueur 2 est de " +
+      loserScore
+  );
 };
 
 // -----------
@@ -117,27 +126,15 @@ const playGame = () => {
 
   if (topCardPlayer1.number > topCardPlayer2.number) {
     cardMoves(player1Deck, player2Deck, warDeck);
-    updateScores(player1Deck, player2Deck);
-
     console.log(chalk.bgBlue("Le joueur 1 remporte cette manche ! "));
-    console.log(
-      "Son score est de " +
-        player1Score +
-        " et le score du Joueur 2 est de " +
-        player2Score
-    );
+    updateScores(player1Deck, player2Deck);
+    announceScores(player1Score, player2Score);
   }
   if (topCardPlayer2.number > topCardPlayer1.number) {
     cardMoves(player1Deck, player2Deck, warDeck);
-    updateScores(player1Deck, player2Deck);
-
     console.log(chalk.bgGreen("Le joueur 2 remporte cette manche ! "));
-    console.log(
-      "Son score est de " +
-        player2Score +
-        " et le score du Joueur 1 est de " +
-        player1Score
-    );
+    updateScores(player1Deck, player2Deck);
+    announceScores(player2Score, player1Score);
   }
   if (topCardPlayer2.number === topCardPlayer1.number) {
     console.log(chalk.bgRed("Ex-Aequo ! Bataille !"));
