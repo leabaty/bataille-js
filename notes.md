@@ -24,4 +24,4 @@ Regrouper les variables dans l'ordre d'exécution, puis regrouper :
 2. La logique 
 3. L'action 
 
-Eventuellement, créer plusieurs fichiers avec des méthodes.
+ToDo : Eventuellement, créer plusieurs fichiers avec des méthodes.

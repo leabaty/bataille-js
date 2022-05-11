@@ -1,5 +1,4 @@
 import chalk from "chalk";
-
 console.log(chalk.yellow("Jeu de la bataille"));
 
 // -- INITIALIZATION OF VALUES

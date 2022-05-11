@@ -56,7 +56,6 @@ const warGame = {
         warGame.deck.push({
           color,
           number,
-          // name : cardnames[card % 13]
         });
       }
     }
