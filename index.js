@@ -2,7 +2,8 @@ import chalk from "chalk";
 
 console.log(chalk.yellow("Jeu de la bataille"));
 
-// Initialization of values
+// -- INITIALIZATION OF VALUES
+
 const colors = ["♣️", "❤️", "♦️", "♠️"];
 const numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 const names = [
@@ -26,21 +27,15 @@ const deck = [];
 let player1Deck = [];
 let player2Deck = [];
 
-const createDeck = (cardcolor, cardnumber) => {
-  for (const color of cardcolor) {
-    for (const number of cardnumber) {
-      deck.push({
-        color,
-        number,
-      });
-    }
-  }
+let player1Score = player1Deck.length;
+let player2Score = player2Deck.length;
 
-  // push the literal version of the numbers every 13 items
-  deck.forEach((card, i) => (card.name = names[i % 13]));
+let topCardPlayer1 = player1Deck[0];
+let topCardPlayer2 = player2Deck[0];
 
-  shuffleCards(deck);
-};
+let warDeck = [];
+
+// -- LOGIC --
 
 // Shuffle formula, found on https://dev.to/codebubb/how-to-shuffle-an-array-in-javascript-2ikj#:~:text=The%20first%20and%20simplest%20way,10%5D%3B%20const%20shuffledArray%20%3D%20array.
 const shuffleCards = (array) => {
@@ -52,59 +47,66 @@ const shuffleCards = (array) => {
   }
 };
 
-createDeck(colors, numbers);
+const createDeck = (cardcolor, cardnumber, cardnames) => {
+  for (const color of cardcolor) {
+    for (const number of cardnumber) {
+      deck.push({
+        color,
+        number,
+        // name : cardnames[card % 13]
+      });
+    }
+  }
+
+  // push the literal version of the numbers every 13 items
+  deck.forEach((card, i) => (card.name = names[i % 13]));
+
+  shuffleCards(deck);
+};
 
 const distributeCards = (cards) => {
   player1Deck = cards.slice(0, 26);
   player2Deck = cards.slice(26);
 };
 
-distributeCards(deck);
-
-// -----------
-
-let player1Score = player1Deck.length;
-let player2Score = player2Deck.length;
-
-let topCardPlayer1 = player1Deck[0];
-let topCardPlayer2 = player2Deck[0];
-
-let warDeck = [];
-
-let gameIsOver = false;
-
-// -------------
-
-const checkGameOver = () => {
+const gameOver = () => {
   if (player1Deck.length === 0 || player2Deck.length === 0) {
-    gameIsOver = true;
+    return true;
   } else {
-    gameIsOver = false;
+    return false;
   }
 };
 
-const cardMoves = (winnerDeck, loserDeck, warCards) => {
+const compareCards = (
+  winnerDeck,
+  loserDeck,
+  backgroundColor,
+  winner,
+  winnerScore,
+  loserScore
+) => {
+  // Move the cards from one Deck to another
   winnerDeck.push(loserDeck.shift());
   winnerDeck.push(winnerDeck.shift());
 
-  if (warCards.length > 0) {
-    winnerDeck.push(...warCards);
-    warCards.length = 0;
+  if (warDeck.length > 0) {
+    winnerDeck.push(...warDeck);
+    warDeck.length = 0;
   }
-};
 
-const updateScores = (player1Cards, player2Cards) => {
-  player1Score = player1Cards.length;
-  player2Score = player2Cards.length;
-};
+  // Update the scores
+  player1Score = player1Deck.length;
+  player2Score = player2Deck.length;
 
-const announceScores = (winnerScore, loserScore) => {
+  // Announce the scores
+  console.log(
+    chalk[backgroundColor]("Le joueur " + winner + " remporte cette manche !")
+  );
+
   console.log(
     "Son score est maintenant de " + winnerScore + " contre " + loserScore
   );
 };
-
-// -----------
 
 const playGame = () => {
   topCardPlayer1 = player1Deck[0];
@@ -122,23 +124,30 @@ const playGame = () => {
   );
 
   if (topCardPlayer1.number > topCardPlayer2.number) {
-    cardMoves(player1Deck, player2Deck, warDeck);
-    console.log(chalk.bgBlue("Le joueur 1 remporte cette manche ! "));
-    updateScores(player1Deck, player2Deck);
-    announceScores(player1Score, player2Score);
+    compareCards(
+      player1Deck,
+      player2Deck,
+      "bgBlue",
+      "1",
+      player1Score,
+      player2Score
+    );
   }
 
   if (topCardPlayer2.number > topCardPlayer1.number) {
-    cardMoves(player2Deck, player1Deck, warDeck);
-    console.log(chalk.bgGreen("Le joueur 2 remporte cette manche ! "));
-    updateScores(player1Deck, player2Deck);
-    announceScores(player2Score, player1Score);
+    compareCards(
+      player2Deck,
+      player1Deck,
+      "bgGreen",
+      "2",
+      player2Score,
+      player1Score
+    );
   }
   if (topCardPlayer2.number === topCardPlayer1.number) {
     console.log(chalk.bgRed("Ex-Aequo ! Bataille !"));
 
-    checkGameOver();
-    if (!gameIsOver) {
+    if (!gameOver()) {
       // push the two ex-aequo cards into the warDeck + add a new (blind) card
       for (let i = 0; i < 2; i++) {
         warDeck.push(player1Deck.shift(), player2Deck.shift());
@@ -147,18 +156,22 @@ const playGame = () => {
       console.log("La partie se termine en pleine bataille...");
     }
 
-    checkGameOver();
-    if (!gameIsOver) {
+    if (!gameOver()) {
       playGame();
     } else {
       console.log("La partie se termine en pleine bataille...");
     }
   }
 
-  checkGameOver();
+  gameOver();
 };
 
-while (!gameIsOver) {
+// -- PLAY THE GAME
+
+createDeck(colors, numbers, names);
+distributeCards(deck);
+
+while (!gameOver()) {
   playGame();
 }
 
